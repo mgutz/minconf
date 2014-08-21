@@ -12,6 +12,12 @@ environment variables and command line arguments.
 Define environment configurations as objects or in files.
 
     var configs = {
+      _envs: {
+        development: 'common ARGV ENV',
+        test: 'common test ARGV ENV',
+        production: 'common production ARGV ENV'
+      },
+
       common: {
         database: {
           user: 'superuser'
@@ -19,7 +25,7 @@ Define environment configurations as objects or in files.
         }
       },
 
-      staging: {
+      test: {
         database: {
           password: 'secret'
         }
@@ -29,27 +35,16 @@ Define environment configurations as objects or in files.
     };
 
 Configure `minconf`. In this example, the environment is chosen based on the
-value of `NODE_ENV` environment variable. If `NODE_ENV` is not set, use `'development'`
-configuration.
+value of `NODE_ENV` environment variable. If `NODE_ENV` is not set, it defaults to `'development'`.
 
-    var MinConf = require('minconf');
-    var config = new MinConf('NODE_ENV', 'development')
-      // Environments are merged values of one or more objects. Only the current
-      // the current environment is loaded.
-      .set('development', configs.common)
-      .set('staging', configs.common, configs.staging)
-      .set('release', configs.common', configs.production)
-
-      // Merge command line arguments via [minimist](https://github.com/substack/minimist)
-      .merge(MinConf.argv())
-      .config;
+    var config = MinConf.config(configs);
 
 When running in `development`
 
     assert.equal(config.database.user, 'superuser');
     assert.equal(config.database.password, 'password');
 
-When running in `staging`
+When running in `NODE_ENV=test`
 
     assert.equal(config.database.user, 'superuser');
     assert.equal(config.database.password, 'secret');
@@ -58,14 +53,28 @@ When running in `staging`
 
 Precendence increases left to right. In this example,
 
-    set('development', {x: 1}).merge(MinConf.env(), MinConf.argv())
+    development: 'common ARGV ENV'
 
-The `x` value is set to 1, then overridden by `env` then overriden by `argv`.
-In other words, command line arguments override environment variables and
+The `x` value is set to 1, then overridden by `ARGV`, which are the command
+line arguments and then overriden by `ENV`, which are the process environment
+variables. In other words, environment variables override command line arguments and
 configuration files/objects.
 
 WARNING: Avoid merging environment variables. Environment variables can be affected
 by parent process or other init scripts.
+
+
+### Overriding Selector
+
+To override the environment variable seletor and default enviroment, set
+`_envs._selector` and `_envs._default` respectively
+
+    var configs = {
+        _envs: {
+            _selector: 'NODE_ENV',
+            _default: 'developoment'
+        }
+    }
 
 
 ## Running your app

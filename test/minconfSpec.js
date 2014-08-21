@@ -1,18 +1,18 @@
 'use strict';
 var assert = require('assert');
-var Config = require('..');
+var Minconf = require('..');
 
 describe('minconf', function() {
 
   describe('merging and overriding', function() {
 
     it('should read properties', function() {
-      var config = new Config().set('development', {x: 1}).config;
+      var config = new Minconf().set('development', {x: 1}).config;
       assert.equal(config.x, 1);
     });
 
     it('should merge values', function() {
-      var config = new Config().set('development', {x: 1, y: 1 }, {y: 2, z: 1}).config;
+      var config = new Minconf().set('development', {x: 1, y: 1 }, {y: 2, z: 1}).config;
       assert.equal(config.x, 1);
       assert.equal(config.y, 2);
       assert.equal(config.z, 1);
@@ -30,7 +30,7 @@ describe('minconf', function() {
             a: 10,
             sub: { y: 2 }}}};
 
-      var config = new Config().set('development', common, staging).config;
+      var config = new Minconf().set('development', common, staging).config;
       assert.equal(config.parent.sub.a, 10);
       assert.equal(config.parent.sub.sub.x, 1);
       assert.equal(config.parent.sub.sub.y, 2);
@@ -48,7 +48,7 @@ describe('minconf', function() {
             array: [100, 200],
             sub: { y: 2 }}}};
 
-      var config = new Config().set('development', common, staging).config;
+      var config = new Minconf().set('development', common, staging).config;
       assert.equal(config.parent.sub.array[0], 100);
       assert.equal(config.parent.sub.array[1], 200);
       assert.equal(config.parent.sub.sub.x, 1);
@@ -63,7 +63,7 @@ describe('minconf', function() {
 
     it('should use default option if environment variable is not set', function() {
       delete process.env.MINICONF_ENV;
-      var config = new Config('MINICONF_ENV', 'dev')
+      var config = new Minconf('MINICONF_ENV', 'dev')
         .set('dev', {x: 1})
         .set('staging', {x: 2})
         .config;
@@ -72,7 +72,7 @@ describe('minconf', function() {
 
     it('should use value of environment variable', function() {
       process.env.MINICONF_ENV = 'staging';
-      var config = new Config('MINICONF_ENV', 'dev')
+      var config = new Minconf('MINICONF_ENV', 'dev')
         .set('dev', {x: 1})
         .set('staging', {x: 2})
         .config;
@@ -80,14 +80,14 @@ describe('minconf', function() {
     });
 
     it('should allow use of specific environment', function() {
-      var config = new Config(null, 't').set('t', {x: 1}).config;
+      var config = new Minconf(null, 't').set('t', {x: 1}).config;
       assert.equal(config.x, 1);
     });
   });
 
   describe('objects', function() {
     it('should merge 1 or more argument objects', function() {
-      var config = new Config()
+      var config = new Minconf()
         .set('development', {x: 1}, {y: 2})
         .config;
       assert.equal(config.x, 1);
@@ -95,7 +95,7 @@ describe('minconf', function() {
     });
 
     it('should merge an array of objects', function() {
-      var config = new Config()
+      var config = new Minconf()
         .set('development', [{x: 1}, {y: 2}])
         .config;
       assert.equal(config.x, 1);
@@ -103,28 +103,81 @@ describe('minconf', function() {
     });
 
     it('can merge environment and command line args', function() {
-      var config = new Config()
+      var config = new Minconf()
         .set('development', {x: 1}, {y: 2})
         .set('staging', {x: 2}, {y: 3})
-        .merge(Config.env(), Config.argv())
+        .merge(Minconf.env(), Minconf.argv())
         .config;
       assert.equal(config.x, 1);
       assert.equal(config.y, 2);
       assert.equal(config.ui, 'bdd');
+      process.env.ui = undefined;
     });
 
     it('can use dotted names in process.env', function() {
       process.env['MINCONF.db.pass'] = 'secret';
-      var config = new Config()
+      var config = new Minconf()
         .set('development', {x: 1}, {y: 2})
         .set('staging', {x: 2}, {y: 3})
-        .merge(Config.env(), Config.argv())
+        .merge(Minconf.env(), Minconf.argv())
         .config;
       assert.equal(config.x, 1);
       assert.equal(config.y, 2);
       assert.equal(config.ui, 'bdd');
       assert.equal(config.MINCONF.db.pass, 'secret');
       delete process.env['MINCONF.db.pass'];
+    });
+
+    it('can do uber simple', function() {
+      var config = {
+        _envs: {
+          development: 'common ARGV ENV',
+          test: 'common test ARGV ENV',
+          production: 'common production ARGV ENV'
+        },
+        common: {
+          name: 'foo'
+        },
+        test: {
+          name: 'bar'
+        },
+        production: {
+          name: 'bah'
+        }
+      };
+      var c = Minconf.config(config);
+      assert.equal(c.name, 'foo');
+    });
+
+    it('can do uber simple with overrides', function() {
+      var config = {
+        _envs: {
+          _selector: 'FOO_ENV',
+          _default: 'test',
+          development: 'common ARGV ENV',
+          test: 'common test ARGV ENV',
+          production: 'common production ARGV ENV'
+        },
+        common: {
+          name: 'foo'
+        },
+        test: {
+          name: 'bar'
+        },
+        production: {
+          name: 'bah'
+        }
+      };
+
+      // use default
+      var c = Minconf.config(config);
+      assert.equal(c.name, 'bar');
+
+      // switch config based on environment
+      process.env.FOO_ENV = 'production';
+      var c2 = Minconf.config(config);
+      assert.equal(c2.name, 'bah');
+      process.env.FOO_ENV = null;
     });
 
   });
