@@ -1,6 +1,6 @@
 {
   "name": "minconf",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "index.js",
   "directories": {
     "test": "test"
@@ -11,11 +11,10 @@
   "scripts": {
     "test": "mocha --ui bdd --reporter spec"
   },
-  "repository" : {
-    "type" : "git",
-    "url" : "http://github.com/mgutz/minconf.git"
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/mgutz/minconf.git"
   },
   "author": "Mario Gutierrez <mario@mgutz.com>",
   "license": "MIT"
 }
-
