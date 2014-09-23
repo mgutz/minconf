@@ -149,12 +149,13 @@ describe('minconf', function() {
       assert.equal(c.name, 'foo');
     });
 
-    it('can do uber simple with overrides', function() {
+    it('can do load with overrides', function() {
       var config = {
         _options: {
           _selector: 'FOO_ENV',
           _default: 'test',
-          development: 'common ARGV ENV',
+          _cwd: __dirname,
+          development: 'common config.local.json ARGV ENV',
           test: 'common test ARGV ENV',
           production: 'common production ARGV ENV'
         },
@@ -170,15 +171,20 @@ describe('minconf', function() {
       };
 
       // use default
+      delete process.env.FOO_ENV;
       var c = Minconf.load(config).config;
       assert.equal(c.name, 'bar');
 
+      // use development
+      process.env.FOO_ENV = 'development';
+      var c2 = Minconf.load(config).config;
+      assert.equal(c2.name, 'local');
+
       // switch config based on environment
       process.env.FOO_ENV = 'production';
-      var c2 = Minconf.load(config).config;
-      assert.equal(c2.name, 'bah');
-      process.env.FOO_ENV = null;
+      var c3 = Minconf.load(config).config;
+      assert.equal(c3.name, 'bah');
+      delete process.env.FOO_ENV;
     });
-
   });
 });

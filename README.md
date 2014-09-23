@@ -13,7 +13,7 @@ Define environment configurations as objects or in files.
 
     var configs = {
       _options: {
-        development: 'common ARGV ENV',
+        development: 'common config.local.json ARGV ENV',
         test: 'common test ARGV ENV',
         production: 'common production ARGV ENV'
       },
@@ -51,14 +51,14 @@ When running in `NODE_ENV=test`
 
 ### Merging Precendence
 
-Precendence increases left to right. In this example,
+Merging occurs left to right. In this example,
 
-    development: 'common ARGV ENV'
+    development: 'common config.local.json ARGV ENV'
 
-The `x` value is set to 1, then overridden by `ARGV`, which are the command
-line arguments and then overriden by `ENV`, which are the process environment
-variables. In other words, environment variables override command line arguments and
-configuration files/objects.
+The base opbject is `common`, then overriden by a file `config.local.json`, then overridden by `ARGV`,
+which are the command line arguments and then overriden by `ENV`, which are the process environment
+variables. In other words, environment variables override command line arguments which override a
+local configuration file which overrides the base object.
 
 WARNING: Avoid merging environment variables. Environment variables can be affected
 by parent process or other init scripts.
