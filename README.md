@@ -12,7 +12,7 @@ environment variables and command line arguments.
 Define environment configurations as objects or in files.
 
     var configs = {
-      _envs: {
+      _options: {
         development: 'common ARGV ENV',
         test: 'common test ARGV ENV',
         production: 'common production ARGV ENV'
@@ -37,7 +37,7 @@ Define environment configurations as objects or in files.
 Configure `minconf`. In this example, the environment is chosen based on the
 value of `NODE_ENV` environment variable. If `NODE_ENV` is not set, it defaults to `'development'`.
 
-    var config = MinConf.config(configs);
+    var config = MinConf.load(configs).config;
 
 When running in `development`
 
@@ -67,10 +67,10 @@ by parent process or other init scripts.
 ### Overriding Selector
 
 To override the environment variable seletor and default enviroment, set
-`_envs._selector` and `_envs._default` respectively
+`_options._selector` and `_options._default` respectively
 
     var configs = {
-        _envs: {
+        _options: {
             _selector: 'NODE_ENV',
             _default: 'developoment'
         }

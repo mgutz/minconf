@@ -128,9 +128,9 @@ describe('minconf', function() {
       delete process.env['MINCONF.db.pass'];
     });
 
-    it('can do uber simple', function() {
+    it('can do simple load', function() {
       var config = {
-        _envs: {
+        _options: {
           development: 'common ARGV ENV',
           test: 'common test ARGV ENV',
           production: 'common production ARGV ENV'
@@ -145,13 +145,13 @@ describe('minconf', function() {
           name: 'bah'
         }
       };
-      var c = Minconf.config(config);
+      var c = Minconf.load(config).config;
       assert.equal(c.name, 'foo');
     });
 
     it('can do uber simple with overrides', function() {
       var config = {
-        _envs: {
+        _options: {
           _selector: 'FOO_ENV',
           _default: 'test',
           development: 'common ARGV ENV',
@@ -170,16 +170,15 @@ describe('minconf', function() {
       };
 
       // use default
-      var c = Minconf.config(config);
+      var c = Minconf.load(config).config;
       assert.equal(c.name, 'bar');
 
       // switch config based on environment
       process.env.FOO_ENV = 'production';
-      var c2 = Minconf.config(config);
+      var c2 = Minconf.load(config).config;
       assert.equal(c2.name, 'bah');
       process.env.FOO_ENV = null;
     });
 
   });
 });
-
