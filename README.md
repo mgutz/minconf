@@ -12,10 +12,14 @@ environment variables and command line arguments.
 Define environment configurations as objects or in files.
 
     var configs = {
-      _options: {
-        development: 'common config.local.json ARGV ENV',
-        test: 'common test ARGV ENV',
-        production: 'common production ARGV ENV'
+      $: {
+
+        // defines merge order of object properties, files, command-line arguments and the environment
+        envs: {
+          development: 'common config.local.json ARGV ENV',
+          test: 'common test ARGV ENV',
+          production: 'common production ARGV ENV'
+        }
       },
 
       common: {
@@ -34,6 +38,7 @@ Define environment configurations as objects or in files.
       production = require('./config-production.json')
     };
 
+
 Configure `minconf`. In this example, the environment is chosen based on the
 value of `NODE_ENV` environment variable. If `NODE_ENV` is not set, it defaults to `'development'`.
 
@@ -41,13 +46,13 @@ value of `NODE_ENV` environment variable. If `NODE_ENV` is not set, it defaults 
 
 When running in `development`
 
-    assert.equal(config.database.user, 'superuser');
-    assert.equal(config.database.password, 'password');
+    config.database.user == 'superuser'
+    config.database.password == 'password'
 
 When running in `NODE_ENV=test`
 
-    assert.equal(config.database.user, 'superuser');
-    assert.equal(config.database.password, 'secret');
+    config.database.user == 'superuser'
+    config.database.password == 'secret'
 
 ### Merging Precendence
 
@@ -67,12 +72,19 @@ by parent process or other init scripts.
 ### Overriding Selector
 
 To override the environment variable seletor and default enviroment, set
-`_options._selector` and `_options._default` respectively
+`options.envSelector` and `options.defaultEnv` respectively
 
     var configs = {
-        _options: {
-            _selector: 'NODE_ENV',
-            _default: 'developoment'
+        $: {
+          options: {
+            envSelector: 'NODE_ENV',
+            defaultEnv: 'development',
+            wd: process.cwd()
+          },
+
+          envs: {
+            ...
+          }
         }
     }
 

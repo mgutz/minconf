@@ -130,11 +130,14 @@ describe('minconf', function() {
 
     it('can do simple load', function() {
       var config = {
-        _options: {
-          development: 'common ARGV ENV',
-          test: 'common test ARGV ENV',
-          production: 'common production ARGV ENV'
+        $: {
+          envs: {
+            development: 'common ARGV ENV',
+            test: 'common test ARGV ENV',
+            production: 'common production ARGV ENV'
+          }
         },
+
         common: {
           name: 'foo'
         },
@@ -151,14 +154,21 @@ describe('minconf', function() {
 
     it('can do load with overrides', function() {
       var config = {
-        _options: {
-          _selector: 'FOO_ENV',
-          _default: 'test',
-          _cwd: __dirname,
-          development: 'common config.local.json ARGV ENV',
-          test: 'common test ARGV ENV',
-          production: 'common production ARGV ENV'
+        $: {
+          options: {
+            envSelector: 'FOO_ENV',
+            defaultEnv: 'test',
+            wd: __dirname
+          },
+
+          envs: {
+            development: 'common config.local.json ARGV ENV',
+            test: 'common test ARGV ENV',
+            production: 'common production ARGV ENV'
+          }
         },
+
+
         common: {
           name: 'foo'
         },
